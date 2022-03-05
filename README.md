@@ -85,6 +85,10 @@ ECS offre deux modes de fonctionnement :
 
 # Les étapes du projet
 
+## Architecture
+Voici l'architecture de l'infrastructure qu'on mettra en place.
+![Architecture](archi.png)
+
 ## Créer le réseau
 
 Le script Terraform permet de créer un VPC et deux subnets publics.
