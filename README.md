@@ -17,11 +17,12 @@ ELK est une stack logicielle permettant la centralisation de logs. Elle est cons
 - Elasticsearch : c'est un outil d'indexation et de recherche de données.
 - Logstash : c'est un outil de collecte, analyse et stockage de logs.
 - Kibana : c'est un outil de visualisation de données indexées par elasticsearch.
+
 Un cas d'utilisation est la centralisation de toutes les logs des applications d'une entreprise. Les applications envoient les logs à Logstash, qui les colllecte, les analyse et les envoie à elasticsearch pour être indexées. Les développeurs, par exemple, pourraient se connecter à Kibana afin de visualiser les logs qui les intéresseraient. 
 
 # Terraform
 Terraform est un outil open source d'insfrastructure as code. Il permet de créer des resources sur plusieurs cloud provider (AWS, GCP, Azure, etc).
-J'utilise Terraform pour créer mes ressources, lors de mes apprentissages, plutôt qu'à travers la console aws pour les raisons suivantes:
+J'utilise Terraform pour créer mes ressources, lors de mes apprentissages, plutôt qu'à travers la console aws pour les raisons suivantes :
 * l'itération et la reproductibilité. Je peux construire un projet étape par étape. Je pourrai reproduire l'infrastructure facilement plus tard pour d'autres besoins.
 * le code me servira de documentation lorsque je reviendrai pour voir comment créer et configurer une ressource.
 * la possibilité de porter les ressources d'un compte à l'autre facilement.
@@ -43,7 +44,7 @@ provider "aws" {
 }
 ```
 Ici on déclare qu'on utilise le provider aws. Donc l'infrastructure sera déployée sur aws.
-On précise la région et le profile. Ce dernier doit correspondre à un profile configuré dans le fichier credential de votre configuration aws (sur windows C:\Users\ username \. aws\credentials).
+On précise la région et le profile. Ce dernier doit correspondre à un profile configuré dans le fichier credential de votre configuration aws (sur windows C:\Users\ username\\.aws\credentials).
 ### Variables
 Terraform permet de définir des variables et de les réutiliser dans le code. 
 Il existe 3 types de variables : input variables, output variables et local variables (https://www.terraform.io/language/values) 
@@ -285,3 +286,13 @@ Lancer la commande  ```terraform apply``` pour appliquer les modifications.
 
 Rendez vous sur la console aws EC2 pour voir l'instance créée.
 ![Instance EC2](ec2.png)
+
+Récupérer l'ip publique de la task à partir de la console ECS.
+Tapez-la dans un navigateur en rajoutant le port 5601 afin d'accéder à la console de kibana (<ip_de_la_task:5601>).
+![Console kibana](kibana_index_management.png)
+
+Je ferai un projet sur ELK pour aller plus loin.
+En attendant vous pouvez exploiter les metrics envoyées dans l'index créé par filebeat en suivant ce lien pour créer un index pattern: https://www.elastic.co/guide/en/kibana/7.17/index-patterns.html 
+Après avoir créé l'index pattern, re cliquez sur "Discover" dans le menu de kibana et selectionnez votre index pattern pour afficher les metrics de filebeat.
+
+Voilà !
