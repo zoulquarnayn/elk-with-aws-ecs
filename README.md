@@ -135,14 +135,15 @@ Pour créer le réseau, placez vous dans le 00-network depuis une ligne de comma
 Créer un fichier terraform.tfvars et renseigner les variables suivantes avec leur valeur :
 * profile : correspond au profile à utiliser pour se connecter à aws défini dans votre fichier credential aws.
 * region : la région aws où l'infrastrure sera créée. Par exemple eu-west-3 pour la région Paris.
-* my_ip : votre adresse IP publique.
+* my_ip : votre adresse IP publique en notation CIDR (rrr.xxx.yyy.zzz/32).
 
-Lancer la commande ```terraform init``` pour initialiser le répertoire de travail avec les fichiers de configuration de terraform.
+Lancer la commande ```terraform init``` pour initialiser le répertoire de travail avec les fichiers de configuration de terraform. Un répertoire .terraform est généré et un fichier .terraform.lock.hcl.
 
 Lancer la commande  ```terraform plan```. Terraform vous affiche sur la console les modifications qu'il va apporter sur votre compte aws.
 
 Lancer la commande  ```terraform apply``` pour appliquer les modifications.
-Depuis la console aws vpc, vous pouvez visualiser le VPC créé ainsi que les subnets et tout le reste de la configuration (table de routage, etc)
+Depuis la console aws vpc, vous pouvez visualiser le VPC créé ainsi que les subnets et tout le reste de la configuration (table de routage, etc).
+La commande apply génère le fichier state : terraform.tfstate.
 ![VPC créé](vpc.png)
 
 ## les roles IAM
@@ -163,6 +164,9 @@ Lancer la commande  ```terraform plan```. Terraform vous affiche sur la console 
 
 Lancer la commande  ```terraform apply``` pour appliquer les modifications.
 
+Rendez vous sur la console aws IAM, section Roles pour voir le role créé :
+![Role iam](iamrole.png)
+
 ## Cluster
 Dans le fichier 02-elk-cluster\main.tf vous verrez la configuration de création du cluster elk.
 ### Exécution
@@ -176,6 +180,9 @@ Lancer la commande ```terraform init``` pour initialiser le répertoire de trava
 Lancer la commande  ```terraform plan```. Terraform vous affiche sur la console les modifications qu'il va apporter sur votre compte aws.
 
 Lancer la commande  ```terraform apply``` pour appliquer les modifications.
+
+Rendez vous sur la console aws ECS, section Clusters pour voir le cluster créé :
+![Cluster ecs](ecscluster.png)
 
 ## Task definition
 Dans le cadre de ce projet j'ai créé une task definition de type FARGATE :
@@ -221,6 +228,9 @@ Lancer la commande ```terraform init``` pour initialiser le répertoire de trava
 Lancer la commande  ```terraform plan```. Terraform vous affiche sur la console les modifications qu'il va apporter sur votre compte aws.
 
 Lancer la commande  ```terraform apply``` pour appliquer les modifications.
+
+Rendez vous sur la console aws ECS, section Task Definition pour voir la task definition créée :
+![Task definition](taskdefinition.png)
 ## Service
 Dans le répertoire 04-elk-service, le fichier main.tf contient la définition de notre service. 
 ```
@@ -251,6 +261,10 @@ Lancer la commande  ```terraform plan```. Terraform vous affiche sur la console 
 
 Lancer la commande  ```terraform apply``` pour appliquer les modifications.
 
+Rendez vous sur la console aws ECS, section Cluster. Cliquer sur le cluster elk-cluster. Sélectionner l'onglet Services pour voir notre service elk-ecs-service. Pour voir les détails du service, notamment la task lancée, cliquer sur le service.
+![ECS Service](ecsservice.png)
+
+
 ## Instance EC2 
 Dans le répertoire 05-ec2-instance, le fichier main.tf contient la déclaration de l'instance ec2. On copie le fichier filebeat.yml dans l'instance grâce au provisionning.
 On installe des packages sur l'instance grâce, toujours, au provisionning.
@@ -268,3 +282,6 @@ Lancer la commande ```terraform init``` pour initialiser le répertoire de trava
 Lancer la commande  ```terraform plan```. Terraform vous affiche sur la console les modifications qu'il va apporter sur votre compte aws.
 
 Lancer la commande  ```terraform apply``` pour appliquer les modifications.
+
+Rendez vous sur la console aws EC2 pour voir l'instance créée.
+![Instance EC2](ec2.png)

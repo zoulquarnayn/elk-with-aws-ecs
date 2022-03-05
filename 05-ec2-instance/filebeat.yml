@@ -9,7 +9,7 @@ filebeat.config.modules:
 setup.template.settings:
   index.number_of_shards: 1
 output.logstash:
-  hosts: ["10.0.1.60:5044"]
+  hosts: [" 10.0.1.95:5044"]
 processors:
   - add_host_metadata: ~
   - add_cloud_metadata: ~
