@@ -57,7 +57,7 @@ Depuis le répertoire racine où sont situés les fichiers source, on exécute l
 ### Plan
 La commande ```terraform plan``` permet de lister les modifications que Terraform va apporter sur l'infrastructure. Il s'appuie sur son state et le code source pour déterminer les différences et les afficher en sortie de console.
 ### Apply
-La commande ```terraform apply``` va appliquer les modifications listées dans le "plan" (création et/ou suppression de ressources, modification de propriétés de ressources, ect.)
+La commande ```terraform apply``` va appliquer les modifications listées dans le "plan" (création et/ou suppression de ressources, modification de propriétés de ressources, etc.)
 ### Destroy
 La commande ```terraform destroy``` permet de supprimer toutes les ressources créées par Terraform. Cette commande est pratique dans le cadre d'un apprentissage pour supprimer toutes les ressources qu'on a crée pour ses tests, à partir une seule ligne de commande. Ainsi ne pas payer pour une ressource qu'on aurait oublier de supprimer à la main.
 Pour aller plus loin sur Terraform voici le lien vers le site officiel (en anglais) : https://www.terraform.io/language
