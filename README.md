@@ -49,9 +49,9 @@ On précise la région et le profile. Ce dernier doit correspondre à un profile
 Terraform permet de définir des variables et de les réutiliser dans le code. 
 Il existe 3 types de variables : input variables, output variables et local variables (https://www.terraform.io/language/values) 
 Il existe différentes façons de déclarer ces variables et de les initialiser.
-Dans le cadre de ce projet, on utilise que les input variables. Elles sont déclarées dans un fichier variables.tf et initialisées dans un fichier terraform.tfvars.
+Dans le cadre de ce projet, j'utilise que les input variables. Elles sont déclarées dans un fichier variables.tf et initialisées dans un fichier terraform.tfvars.
 ## Les principales commandes
-On utilise terraform à travers la ligne de commande.
+On utilise terraform à travers une ligne de commande.
 ### Init
 Depuis le répertoire racine où sont situés les fichiers source, on exécute la commande ```terraform init```. Cette commande permet d'initialiser le contexte terraform pour le projet en cours, de télécharger le provider et certaines dépendances.
 ### Plan
@@ -59,8 +59,8 @@ La commande ```terraform plan``` permet de lister les modifications que Terrafor
 ### Apply
 La commande ```terraform apply``` va appliquer les modifications listées dans le "plan" (création et/ou suppression de ressources, modification de propriétés de ressources, etc.)
 ### Destroy
-La commande ```terraform destroy``` permet de supprimer toutes les ressources créées par Terraform. Cette commande est pratique dans le cadre d'un apprentissage pour supprimer toutes les ressources qu'on a crée pour ses tests, à partir une seule ligne de commande. Ainsi ne pas payer pour une ressource qu'on aurait oublier de supprimer à la main.
-Pour aller plus loin sur Terraform voici le lien vers le site officiel (en anglais) : https://www.terraform.io/language
+La commande ```terraform destroy``` permet de supprimer toutes les ressources créées par Terraform. Cette commande est pratique dans le cadre d'un apprentissage pour supprimer toutes les ressources qu'on a crée pour ses tests, à partir une seule ligne de commande. Ainsi ne pas payer pour une ressource qu'on aurait oublié de supprimer à la main.
+Pour aller plus loin sur Terraform voici le lien du site officiel (en anglais) : https://www.terraform.io/language
 # ECS
 ECS (Elastic Container Service) est un service proposé par AWS pour créer et ochestrer l'exécution de containers Docker. Les containers sont exécutés dans un cluster.
 ## Les composants
