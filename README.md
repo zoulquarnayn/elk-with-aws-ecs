@@ -89,10 +89,14 @@ ECS offre deux modes de fonctionnement :
 ## Architecture
 Voici l'architecture de l'infrastructure qu'on mettra en place.
 ![Architecture](archi.png)
+Sur le schéma, sont représentés les 3 containers Docker elasticsearch, logstash et kibana. 
+Ils font partie de la même task.
+Celle ci est lancée à travers un service, nommé ELK Service.
+AWS Fargate fournit l'infrastructure d'exécution des containers.
 
 ## Créer le réseau
 
-Le script Terraform permet de créer un VPC et deux subnets publics.
+Le script Terraform 00-network\main.tf permet de créer un VPC et deux subnets publics.
 
 On crée un VPC
 ```
@@ -131,12 +135,19 @@ resource "aws_subnet" "public_other" {
 }
 ```
 ### Exécution
-Dans le fichier 00-network\main.tf vous verrez le reste de la configuration.
-Pour créer le réseau, placez vous dans le 00-network depuis une ligne de commande (CMD ou Powershell si vous êtes sur windows).
-Créer un fichier terraform.tfvars et renseigner les variables suivantes avec leur valeur :
+Dans le fichier 00-network\main.tf vous verrez l'intégralité de la configuration.
+Pour créer le réseau, se placer dans le répertoire 00-network depuis une ligne de commande (CMD ou Powershell si vous êtes sur windows).
+Créer un fichier terraform.tfvars et renseigner les valeurs des variables suivantes :
 * profile : correspond au profile à utiliser pour se connecter à aws défini dans votre fichier credential aws.
 * region : la région aws où l'infrastrure sera créée. Par exemple eu-west-3 pour la région Paris.
 * my_ip : votre adresse IP publique en notation CIDR (rrr.xxx.yyy.zzz/32).
+
+Exemple de terraform.tfvars
+```
+profile = "ici_mon_profile_aws"
+region = "ici_ma_region_aws"
+my_ip = "ici_mon_ip_public/32"
+```
 
 Lancer la commande ```terraform init``` pour initialiser le répertoire de travail avec les fichiers de configuration de terraform. Un répertoire .terraform est généré et un fichier .terraform.lock.hcl.
 
@@ -153,9 +164,9 @@ On a principalement besoin d'un role iam dans le cadre d'un cluster FARGATE :
 * ecs_task_execution_role (voir le fichier 01-roles\main.tf) qui permet de télécharger l'image Docker (pull image) et d'envoyer des logs dans Cloudwatch.
 On peut créer un role iam pour les tasks qui ont besoin d'appeler des services aws, par exemple s3.
 ### Exécution
-Dans le fichier 01-roles\main.tf vous verrez la configuration.
-Placez vous dans le 01-roles depuis une ligne de commande (CMD ou Powershell si vous êtes sur windows).
-Créer un fichier terraform.tfvars et renseigner les variables suivantes avec leur valeur :
+Dans le fichier 01-roles\main.tf vous verrez l'intégralité de la configuration.
+Se placer dans le répertoire 01-roles depuis une ligne de commande (CMD ou Powershell si vous êtes sur windows).
+Créer un fichier terraform.tfvars et renseigner les les valeurs des variables suivantes :
 * profile : correspond au profile à utiliser pour se connecter à aws défini dans votre fichier credential aws.
 * region : la région aws où l'infrastrure sera créée. Par exemple eu-west-3 pour la région Paris.
 
@@ -169,10 +180,10 @@ Rendez vous sur la console aws IAM, section Roles pour voir le role créé :
 ![Role iam](iamrole.png)
 
 ## Cluster
-Dans le fichier 02-elk-cluster\main.tf vous verrez la configuration de création du cluster elk.
+Dans le fichier 02-elk-cluster\main.tf vous verrez l'intégralité de la configuration du cluster elk.
 ### Exécution
-Placez vous dans le 02-elk-cluster depuis une ligne de commande (CMD ou Powershell si vous êtes sur windows).
-Créer un fichier terraform.tfvars et renseigner les variables suivantes avec leur valeur :
+Se placer dans le répertoire 02-elk-cluster depuis une ligne de commande (CMD ou Powershell si vous êtes sur windows).
+Créer un fichier terraform.tfvars et renseigner les valeurs des variables suivantes :
 * profile : correspond au profile à utiliser pour se connecter à aws défini dans votre fichier credential aws.
 * region : la région aws où l'infrastrure sera créée. Par exemple eu-west-3 pour la région Paris.
 
@@ -200,27 +211,27 @@ AWS associe une IP à l'ENI.
 
 j'ai déclaré trois containers : elasticsearch, kibana et logstash.
 
-Exemple de définition du container elasticsearch :
+Exemple : définition du container elasticsearch :
 
 ![Container definition](container_definition_screenshot.png)
 
-1. Le nom de notre container. Ici elasticsearch
-2. L'image Docker qui sera utilisée pour créer le container. Par défaut, ECS cherchera dans le registry officiel Docker. On peut spécifier d'autre registry comme ECR d'AWS ou un registry privé.
-3. On définit le port que le container exposera. On a pas besoin de spécifier le port du host auquel il sera mappé dans le cadre d'un container exécuté par FARGATE. En effet, avec FARGATE, chaque task est liée à sa propre ENI. Les containers de la task partagent la même adresse IP. Chacun exposera un port spécifique. Si on définit plusieurs tasks, il n'y a pas de risque de collision de ports.
-4. Avec ce paramètre, on liste les variables d'environnement qu'on passe au container. Ici je passe le paramètre "discovery.type" qui indique à elasticsearch s'il doit fonctionner en mode cluster avec plusieurs noeuds ou single node dans notre cas.
-5. Il est important de définir un healthcheck pour vérifier que le service embarqué dans le container fonctionne bien. 
+1.  name : Le nom de notre container. Ici elasticsearch
+2.  image : L'image Docker qui sera utilisée pour créer le container. Par défaut, ECS cherchera dans le registry officiel Docker. On peut spécifier d'autre registry comme ECR d'AWS ou un registry privé.
+3. portMappings : On définit le port que le container exposera. On a pas besoin de spécifier le port du host auquel il sera mappé dans le cadre d'un container exécuté par FARGATE. En effet, avec FARGATE, chaque task est liée à sa propre ENI. Les containers de la task partagent la même adresse IP. Chacun exposera un port spécifique. Si on définit plusieurs tasks, il n'y a pas de risque de collision de ports.
+4. environment : Avec ce paramètre, on liste les variables d'environnement qu'on passe au container. Ici je passe le paramètre "discovery.type" qui indique à elasticsearch s'il doit fonctionner en mode cluster avec plusieurs noeuds ou single node dans notre cas.
+5. healthCheck : Il est important de définir un healthcheck pour vérifier que le service embarqué dans le container fonctionne bien. 
 
     1. command : représente la commande que Docker exécutera à l'intérieur du container
     2. interval : représente l'intervalle de temps en secondes entre 2 exécutions de command
     3. retries : représente le nombre max de fois que command sera exécutée jusqu'au succès. Sinon, si le nombre max est atteint, le healthchek est en échec.
     4. timeout : représente le temps max en secondes que Docker attendra la réponse du service.
     5. startPeriod : représente la période de temps en seconde que Docker attendra avant de lancer command la première. Docker attendra que le container démarre pendant ce temps.
-6. Pour les task definition qui contiennent plusieurs containers, il est important de définir le ou les containers "essential". Lorsqu'un container "essential" n'est plus en exécution, les autres containers de la même task seront arrêtés.
-7. Ici on définit les paramètres de log. Dans le cadre de ce projet, j'utilise le driver awslogs. Ce qui permet de voir les logs du container dans Cloudwatch.
+6. essential : Pour les task definition qui contiennent plusieurs containers, il est important de définir le ou les containers "essential". Lorsqu'un container "essential" n'est plus en exécution, les autres containers de la même task seront arrêtés.
+7. logConfiguration : Ici on définit les paramètres de log. Dans le cadre de ce projet, j'utilise le driver awslogs. Ce qui permet de voir les logs du container dans Cloudwatch.
 ### Exécution
-Dans le fichier 03-elk-task-definition\main.tf vous verrez toute la configuration.
-Placez vous dans le 03-elk-task-definition depuis une ligne de commande (CMD ou Powershell si vous êtes sur windows).
-Créer un fichier terraform.tfvars et renseigner les variables suivantes avec leur valeur :
+Dans le fichier 03-elk-task-definition\main.tf vous verrez l'intégralité de la configuration.
+Se placer dans le répertoire 03-elk-task-definition depuis une ligne de commande (CMD ou Powershell si vous êtes sur windows).
+Créer un fichier terraform.tfvars et renseigner valeurs des variables suivantes :
 * profile : correspond au profile à utiliser pour se connecter à aws défini dans votre fichier credential aws.
 * region : la région aws où l'infrastrure sera créée. Par exemple eu-west-3 pour la région Paris.
 
@@ -230,7 +241,7 @@ Lancer la commande  ```terraform plan```. Terraform vous affiche sur la console 
 
 Lancer la commande  ```terraform apply``` pour appliquer les modifications.
 
-Rendez vous sur la console aws ECS, section Task Definition pour voir la task definition créée :
+Se rendre sur la console aws ECS, section Task Definition pour voir la task definition créée :
 ![Task definition](taskdefinition.png)
 ## Service
 Dans le répertoire 04-elk-service, le fichier main.tf contient la définition de notre service. 
@@ -250,9 +261,9 @@ resource "aws_ecs_service" "elk_ecs_service" {
 Le service est configuré pour lancer une seule task au sein du cluster créé précédemment. Il lancera la task dans le subnet public elk, créé aussi précédemment.
 On protège l'accès aux containers à travers le security group allow_access_elk créé plus haut. On autorise que la connexion en http au port 5601 qui correspond au port d'écoute de kibana.
 ### Exécution
-Dans le fichier 04-elk-service\main.tf vous verrez toute la configuration.
-Placez vous dans le répertoire 04-elk-service depuis une ligne de commande (CMD ou Powershell si vous êtes sur windows).
-Créer un fichier terraform.tfvars et renseigner les variables suivantes avec leur valeur :
+Dans le fichier 04-elk-service\main.tf vous verrez l'intégralité de la configuration.
+Se placer dans le répertoire 04-elk-service depuis une ligne de commande (CMD ou Powershell si vous êtes sur windows).
+Créer un fichier terraform.tfvars et renseigner les valeurs des variables suivantes :
 * profile : correspond au profile à utiliser pour se connecter à aws défini dans votre fichier credential aws.
 * region : la région aws où l'infrastrure sera créée. Par exemple eu-west-3 pour la région Paris.
 
@@ -262,7 +273,7 @@ Lancer la commande  ```terraform plan```. Terraform vous affiche sur la console 
 
 Lancer la commande  ```terraform apply``` pour appliquer les modifications.
 
-Rendez vous sur la console aws ECS, section Cluster. Cliquer sur le cluster elk-cluster. Sélectionner l'onglet Services pour voir notre service elk-ecs-service. Pour voir les détails du service, notamment la task lancée, cliquer sur le service.
+Se rendre sur la console aws ECS, section Cluster. Cliquer sur le cluster elk-cluster. Sélectionner l'onglet Services pour voir notre service elk-ecs-service. Pour voir les détails du service, notamment la task lancée, cliquer sur le service.
 ![ECS Service](ecsservice.png)
 
 
@@ -271,8 +282,8 @@ Dans le répertoire 05-ec2-instance, le fichier main.tf contient la déclaration
 On installe des packages sur l'instance grâce, toujours, au provisionning.
 Dans le fichier filebeat.yml, modifier l'adresse de logstash (hosts: ["10.0.1.60:5044"]) avec l'ip privée générée pour votre task. 
 ### Exécution
-Placez vous dans le répertoire 05-ec2-instance depuis une ligne de commande (CMD ou Powershell si vous êtes sur windows).
-Créer un fichier terraform.tfvars et renseigner les variables suivantes avec leur valeur :
+Se placer dans le répertoire 05-ec2-instance depuis une ligne de commande (CMD ou Powershell si vous êtes sur windows).
+Créer un fichier terraform.tfvars et renseigner valeurs des variables suivantes :
 * profile : correspond au profile à utiliser pour se connecter à aws défini dans votre fichier credential aws.
 * region : la région aws où l'infrastrure sera créée. Par exemple eu-west-3 pour la région Paris.
 * key_name : Créer une key pair sur votre compte aws dans la région où vous déployez le cluster (si vous en avez pas) et renseigner le nom de cette key pair comme valeur de cette variable.
@@ -284,15 +295,15 @@ Lancer la commande  ```terraform plan```. Terraform vous affiche sur la console 
 
 Lancer la commande  ```terraform apply``` pour appliquer les modifications.
 
-Rendez vous sur la console aws EC2 pour voir l'instance créée.
+Se rendre sur la console aws EC2 pour voir l'instance créée.
 ![Instance EC2](ec2.png)
 
-Récupérer l'ip publique de la task à partir de la console ECS.
+## Visualisation des métriques 
+
+Récupérer l'adresse ip publique de la task à partir de la console ECS.
 Tapez-la dans un navigateur en rajoutant le port 5601 afin d'accéder à la console de kibana (<ip_de_la_task:5601>).
 ![Console kibana](kibana_index_management.png)
-
-Je ferai un projet sur ELK pour aller plus loin.
-En attendant vous pouvez exploiter les metrics envoyées dans l'index créé par filebeat en suivant ce lien pour créer un index pattern: https://www.elastic.co/guide/en/kibana/7.17/index-patterns.html 
-Après avoir créé l'index pattern, re cliquez sur "Discover" dans le menu de kibana et selectionnez votre index pattern pour afficher les metrics de filebeat.
+Vous pouvez exploiter les métriques envoyées dans l'index créé par filebeat en suivant ce lien pour créer un index pattern: https://www.elastic.co/guide/en/kibana/7.17/index-patterns.html 
+Après avoir créé l'index pattern, re cliquer sur "Discover" dans le menu de kibana et selectionner votre index pattern pour afficher les metriques de filebeat.
 
 Voilà !
