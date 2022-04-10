@@ -16,9 +16,13 @@ Pour aborder ce projet, vous devez connaître ou au moins avoir des notions sur 
 ELK est une stack logicielle permettant la centralisation de logs. Elle est constituée de :
 - Elasticsearch : c'est un outil d'indexation et de recherche de données.
 - Logstash : c'est un outil de collecte, analyse et stockage de logs.
-- Kibana : c'est un outil de visualisation de données indexées par elasticsearch.
+- Kibana : c'est un outil de visualisation des données indexées par elasticsearch.
 
-Un cas d'utilisation est la centralisation de toutes les logs des applications d'une entreprise. Les applications envoient les logs à Logstash, qui les colllecte, les analyse et les envoie à elasticsearch pour être indexées. Les développeurs, par exemple, pourraient se connecter à Kibana afin de visualiser les logs qui les intéresseraient. 
+Logstash consomme beaucoup de resource mémoire. Généralement, lorsqu'on a besoin de transformer les logs avant de les envoyer dans elasticsearch, on utilise un autre module en amont: exemple Filebeat. Ce dernier permet de collecter des logs sur des machines distantes et de les transmettre à Logstash. Ce dernier transforme les logs (ajout de nouveaux champs, formattage de champs, etc.) et les envoie dans elasticsearch. 
+
+A noter que Filebeat peut transmettre les logs directement dans elasticsearch s'il n'y a pas besoin de transformation.
+Kibana est branché sur elasticsearch pour visualiser les données. 
+![Architecture ELK](elk_archi.png)
 
 # Terraform
 Terraform est un outil open source d'insfrastructure as code. Il permet de créer des resources sur plusieurs cloud provider (AWS, GCP, Azure, etc).
@@ -306,4 +310,3 @@ Tapez-la dans un navigateur en rajoutant le port 5601 afin d'accéder à la cons
 Vous pouvez exploiter les métriques envoyées dans l'index créé par filebeat en suivant ce lien pour créer un index pattern: https://www.elastic.co/guide/en/kibana/7.17/index-patterns.html 
 Après avoir créé l'index pattern, re cliquer sur "Discover" dans le menu de kibana et selectionner votre index pattern pour afficher les metriques de filebeat.
 
-Voilà !
